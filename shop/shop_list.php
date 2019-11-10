@@ -50,6 +50,9 @@
                 echo '</a>';
                 echo '<br />';
             }
+
+            echo '<br><a href="shop_cartlook.php">カートを見る</a><br>';
+
         } catch (Exception $e) {
             echo 'ただいま障害により大変ご迷惑をおかけしております。';
             exit();
