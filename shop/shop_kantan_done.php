@@ -1,6 +1,11 @@
 <?php
     session_start();
     session_regenerate_id(true);
+    if (isset($_SESSION['member_login'])==false) {
+        echo 'ログインされていません。<br>';
+        echo '<a href="shop_list.php">商品一覧へ</a>';
+        exit();
+    }
 ?>
 <!DOCTYPE html>
 <html>
@@ -23,10 +28,6 @@
             $postal2=$post['postal2'];
             $address=$post['address'];
             $tel=$post['tel'];
-            $chumon=$post['chumon'];
-            $pass=$post['pass'];
-            $danjo=$post['danjo'];
-            $birth=$post['birth'];
 
             echo $onamae.'様<br>';
             echo 'ご注文ありがとうございました。<br>';
@@ -76,33 +77,7 @@
             $stmt = $dbh->prepare($sql);
             $stmt->execute();
 
-            $lastmembercode=0;
-            if ($chumon=='chumontouroku') {
-                $sql = 'INSERT INTO dat_member(password,name,email,postal1,postal2,address,tel,danjo,born) VALUES(?,?,?,?,?,?,?,?,?)';
-                $stmt = $dbh->prepare($sql);
-                $data = array();
-                $data[]=md5($pass);
-                $data[]=$onamae;
-                $data[]=$email;
-                $data[]=$postal1;
-                $data[]=$postal2;
-                $data[]=$address;
-                $data[]=$tel;
-                if ($danjo=='dan') {
-                    $data[]=1;
-                }
-                else {
-                    $data[]=2;
-                }
-                $data[]=$birth;
-                $stmt->execute($data);
-            
-                $sql = 'SELECT LAST_INSERT_ID()';
-                $stmt = $dbh->prepare($sql);
-                $stmt->execute();
-                $rec = $stmt->fetch(PDO::FETCH_ASSOC);
-                $lastmembercode = $rec['LAST_INSERT_ID()'];
-            }
+            $lastmembercode=$_SESSION['member_code'];
 
             $sql = 'INSERT INTO dat_sales(code_member,name,email,postal1,postal2,address,tel) VALUES(?,?,?,?,?,?,?)';
             $stmt = $dbh->prepare($sql);
@@ -139,32 +114,6 @@
 
             $dbh=null;
 
-            if ($chumon=='chumontouroku') {
-                echo '会員登録が完了しました。<br>';
-                echo '次回からメールアドレスとパスワードでログインしてください。<br>';
-                echo 'ご注文がスムーズになります。<br><br>';
-            }
-
-            $honbun.="送料は無料です。\n";
-            $honbun.="--------------------\n";
-            $honbun.="代金は以下の口座にお振込みください。\n";
-            $honbun.="○○銀行　△△支店　普通口座　1234567 \n";
-            $honbun.="入金の確認が取れ次第、発送させていただきます。\n";
-            $honbun.="\n";
-            $honbun.="********************\n";
-            $honbun.="～会社名～\n";
-            $honbun.="\n";
-            $honbun.="AAA県BBB市CCC 123-4\n";
-            $honbun.="電話番号　090-xxxx-yyyy\n";
-            $honbun.="メールアドレス　abcdefg@vwxyz.co.jp\n";
-            $honbun.="********************\n";
-            if ($chumon=='chumontouroku') {
-                $honbun.="会員登録が完了しました。\n";
-                $honbun.="次回からメールアドレスとパスワードでログインしてください。\n";
-                $honbun.="ご注文がスムーズになります。\n";
-                $honbun.="\n";
-            }
-            
             //内容確認用
             //'<br>';
             //echo nl2br($honbun);
@@ -187,7 +136,7 @@
             echo 'ただいま障害により大変ご迷惑をおかけしております。';
             exit();
         }
-        
+
         $_SESSION=array();
         session_destroy();
     ?>
